@@ -33,7 +33,9 @@ sys.path.insert(0, str(AQUI))
 from extraer import SENSIBLES, extraer  # noqa: E402
 from rasgos import grupo  # noqa: E402
 
-CONFIG = json.loads((AQUI / "config.json").read_text(encoding="utf-8"))
+from configuracion import cargar  # noqa: E402
+
+CONFIG = cargar(AQUI)
 CONF = CONFIG.get("busqueda", {})
 INDICE = AQUI / "registro_local" / "indice.db"
 CACHE_MODELOS = AQUI / "registro_local" / "modelos_embeddings"

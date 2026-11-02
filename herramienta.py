@@ -34,9 +34,10 @@ from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
 sys.path.insert(0, str(AQUI))
+from configuracion import cargar  # noqa: E402
 from extraer import OFFICE, SENSIBLES, TEXTO, texto_office, texto_pdf  # noqa: E402
 
-CONFIG = json.loads((AQUI / "config.json").read_text(encoding="utf-8"))
+CONFIG = cargar(AQUI)
 
 ORIGENES = [Path(os.path.expanduser(p)).resolve() for p in CONFIG["origenes"]]
 BASE = Path(os.path.expanduser(CONFIG["carpeta_destino"])).resolve()

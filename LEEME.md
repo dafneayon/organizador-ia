@@ -21,7 +21,7 @@ Truco: escribe `organizador ahora ` y arrastra la carpeta desde Finder a la Term
 
 - Las subcarpetas que crea el organizador quedan marcadas como categoría (etiqueta con su nombre) y no se mueven en ejecuciones futuras.
 - Tus subcarpetas existentes se respetan. Solo se mueven o renombran si es claramente necesario.
-- No se permite organizar tu carpeta personal completa, `~/Library`, carpetas ocultas, carpetas fuera de tu usuario ni carpetas que sean (o estén dentro de) un proyecto de código como `Piloto`.
+- No se permite organizar tu carpeta personal completa, `~/Library`, carpetas ocultas, carpetas fuera de tu usuario ni carpetas que sean (o estén dentro de) un proyecto de código.
 - Si programas carpetas, la programación organiza solo esas. Sin carpetas, organiza Escritorio y Descargas.
 
 ## Garantías
@@ -35,8 +35,15 @@ Truco: escribe `organizador ahora ` y arrastra la carpeta desde Finder a la Term
   - Las rutas relativas que salen del proyecto (`../algo`) no se cambian: se avisan para que las revises.
   - En un repositorio git, los archivos ajustados aparecerán como modificados en `git status`.
   - Con `"ajustar_rutas_proyectos": false` no se ajusta nada. Con `"proteger_proyectos": true` los proyectos no se mueven en absoluto.
-- No se tocan los archivos ocultos, las descargas incompletas ni lo que esté en `excluir_nombres` (por ejemplo, `Piloto`).
+- No se tocan los archivos ocultos, las descargas incompletas ni lo que esté en `excluir_nombres`. Tus exclusiones personales van en `config.local.json` (ver abajo).
 - `deshacer` también revierte los renombrados y los ajustes de rutas.
+
+## Ajustes personales (`config.local.json`)
+`config.json` trae los valores por defecto y se sube al repositorio. Tus ajustes personales van en `config.local.json`, que solo vive en tu Mac (está en `.gitignore`). Por ejemplo, carpetas tuyas que nunca se deben mover:
+
+    cp ~/OrganizadorIA/config.local.example.json ~/OrganizadorIA/config.local.json
+
+Las claves de `config.local.json` reemplazan a las de `config.json`. Las listas se reemplazan completas, así que copia la lista entera de `excluir_nombres` y agrega lo tuyo. Los objetos como `clasificador` o `busqueda` se combinan clave por clave.
 
 ## PDF y escaneos
 `vistazo` lee el texto de los PDF con PDFKit y, si una página no tiene texto (un escaneo), hace OCR en español e inglés con Vision, todo dentro de tu Mac. El lector (`pdf_texto.swift`) se compila solo la primera vez en `bin/`. Si no hay `swiftc`, usa el índice de Spotlight como antes.

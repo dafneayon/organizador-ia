@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Revisar sintaxis
         run: |
-          /usr/bin/python3 -m py_compile herramienta.py extraer.py rasgos.py catalogo.py entrenar.py busqueda.py mcp_servidor.py evals/evaluar_busqueda.py
+          /usr/bin/python3 -m py_compile herramienta.py configuracion.py extraer.py rasgos.py catalogo.py entrenar.py busqueda.py mcp_servidor.py evals/evaluar_busqueda.py
           zsh -n organizador
       - name: Compilar lector de PDF
         run: mkdir -p bin && swiftc -O -o bin/pdf_texto pdf_texto.swift

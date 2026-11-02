@@ -31,9 +31,10 @@ ejecutar() {
   [[ -x "$CLAUDE" ]] || { echo "No encuentro 'claude'. Instálalo: curl -fsSL https://claude.ai/install.sh | bash"; exit 1; }
   local HERR="$DIR/herramienta.py"
   local PROMPT="$(/usr/bin/python3 -I -c '
-import json,sys
-d=sys.argv[1]
-c=json.load(open(d+"/config.json"))["categorias"]
+import sys
+d=sys.argv[1]; sys.path.insert(0, d)
+from configuracion import cargar
+c=cargar(d)["categorias"]
 cats="\n".join("- %s | %s | %s" % (k, v["color"] or "sin color", v["ejemplos"]) for k,v in c.items())
 print(open(d+"/instrucciones.md").read().replace("$CATEGORIAS", cats))' "$DIR")"
   PROMPT="$PROMPT
@@ -89,8 +90,10 @@ Los elementos marcados [ALTA CONFIANZA] ya los movió el clasificador local (en 
 
 auto_activado() {
   /usr/bin/python3 -I -c '
-import json,sys
-c=json.load(open(sys.argv[1]+"/config.json")).get("clasificador",{})
+import sys
+sys.path.insert(0, sys.argv[1])
+from configuracion import cargar
+c=cargar(sys.argv[1]).get("clasificador",{})
 sys.exit(0 if c.get("usar") and c.get("auto_mover") else 1)' "$DIR"
 }
 

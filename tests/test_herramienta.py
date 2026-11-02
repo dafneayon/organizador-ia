@@ -27,7 +27,7 @@ class Entorno(unittest.TestCase):
             (self.home / d).mkdir(parents=True)
         self.app.mkdir()
         for f in ("herramienta.py", "extraer.py", "rasgos.py", "catalogo.py", "entrenar.py",
-                  "busqueda.py", "mcp_servidor.py", "pdf_texto.swift"):
+                  "busqueda.py", "mcp_servidor.py", "configuracion.py", "pdf_texto.swift"):
             if not (RAIZ / f).exists():
                 continue
             shutil.copy2(RAIZ / f, self.app)
@@ -120,7 +120,7 @@ class TestLimites(Entorno):
         self.assertTrue(f.exists())
 
     def test_no_toca_ocultos_excluidos_ni_descargas_incompletas(self):
-        for nombre in (".secreto", "Piloto", "video.mp4.crdownload"):
+        for nombre in (".secreto", "OrganizadorIA", "video.mp4.crdownload"):
             f = self.archivo(self.desc / nombre)
             r = self.correr("mover", "--destino", "Otros", f)
             self.assertNotEqual(r.returncode, 0, nombre)

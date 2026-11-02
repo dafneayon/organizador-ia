@@ -15,7 +15,10 @@ import sys
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
-CONFIG = json.loads((AQUI / "config.json").read_text(encoding="utf-8"))
+sys.path.insert(0, str(AQUI))
+from configuracion import cargar  # noqa: E402
+
+CONFIG = cargar(AQUI)
 REGISTRO = AQUI / "registro_local" / "movimientos.jsonl"
 DB = AQUI / "registro_local" / "catalogo.db"
 BASE = Path(os.path.expanduser(CONFIG["carpeta_destino"]))

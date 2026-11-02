@@ -42,7 +42,6 @@
     "min_ejemplos_subcarpeta": 5
   },
   "excluir_nombres": [
-    "Piloto",
     "OrganizadorIA",
     "Organizado",
     "$RECYCLE.BIN",

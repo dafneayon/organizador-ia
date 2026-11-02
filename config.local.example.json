@@ -1,0 +1,15 @@
+{
+  "excluir_nombres": [
+    "MyProjectFolder",
+    "OrganizadorIA",
+    "Organizado",
+    "$RECYCLE.BIN",
+    "Icon\r"
+  ],
+  "busqueda": {
+    "excluir": ["Personal e Identidad/Claves y certificados", "Salud"]
+  },
+  "clasificador": {
+    "auto_mover": false
+  }
+}

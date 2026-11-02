@@ -255,6 +255,10 @@ tests/                 Safety, classifier, search and MCP tests
 - [ ] **Phase 3b, Reminds me:** extraction of expiration dates (ID, passport, contracts, insurance) and invoice amounts with structured outputs, plus reminders
 - [ ] **Phase 4, Product:** FastAPI service with a review screen for the "To review" folder (human-in-the-loop feedback for retraining), OpenTelemetry tracing (tokens, cost, latency), a dashboard and Docker for the API and search services
 
+## License
+
+[MIT](LICENSE). Use it, adapt it and share it; just keep the copyright notice.
+
 ## Author
 
 **Dafne Gissell Ayon Rosales**, AI/ML Engineer · M.Sc. in Bioengineering and Intelligent Computing  

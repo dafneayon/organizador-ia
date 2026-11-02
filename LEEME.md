@@ -38,6 +38,16 @@ Truco: escribe `organizador ahora ` y arrastra la carpeta desde Finder a la Term
 - No se tocan los archivos ocultos, las descargas incompletas ni lo que esté en `excluir_nombres` (por ejemplo, `Piloto`).
 - `deshacer` también revierte los renombrados y los ajustes de rutas.
 
+## PDF y escaneos
+`vistazo` lee el texto de los PDF con PDFKit y, si una página no tiene texto (un escaneo), hace OCR en español e inglés con Vision, todo dentro de tu Mac. El lector (`pdf_texto.swift`) se compila solo la primera vez en `bin/`. Si no hay `swiftc`, usa el índice de Spotlight como antes.
+
+## Pruebas
+Las garantías de arriba se comprueban con pruebas automáticas que usan un HOME falso en una carpeta temporal, así que nunca tocan tus archivos:
+
+    /usr/bin/python3 -m unittest discover -s tests -v
+
+En GitHub, `.github/workflows/pruebas.yml` las corre en macOS en cada push. `registro_local/` está en `.gitignore` y nunca se sube.
+
 ## Privacidad
 - Sin memoria: la memoria automática está desactivada, la sesión no se guarda en disco (`--no-session-persistence`), no se cargan tus ajustes ni tu CLAUDE.md, y la telemetría está desactivada.
 - Para clasificar, los nombres de archivo y algunos extractos se envían a Anthropic. Si pones `"leer_contenido": false` en config.json, solo usará nombres y metadatos.

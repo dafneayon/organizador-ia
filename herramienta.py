@@ -433,6 +433,35 @@ def cmd_listar(a):
             print("  = " + " | ".join(str(x) for x in g))
 
 
+def lector_pdf():
+    """Compila pdf_texto.swift en bin/ la primera vez (o si cambio). None si no hay swiftc."""
+    fuente, binario = AQUI / "pdf_texto.swift", AQUI / "bin" / "pdf_texto"
+    if binario.exists() and binario.stat().st_mtime >= fuente.stat().st_mtime:
+        return binario
+    if not shutil.which("swiftc"):
+        return None
+    binario.parent.mkdir(exist_ok=True)
+    r = subprocess.run(["swiftc", "-O", "-o", str(binario), str(fuente)],
+                       capture_output=True, text=True)
+    return binario if r.returncode == 0 else None
+
+
+def texto_pdf(p: Path, n: int) -> str:
+    """Capa de texto con PDFKit, OCR con Vision si es un escaneo; si falla, indice de Spotlight."""
+    lector = lector_pdf()
+    if lector:
+        try:
+            r = subprocess.run([str(lector), str(p), str(n), "2"],
+                               capture_output=True, text=True, timeout=60)
+            if r.returncode == 0 and r.stdout.strip():
+                return r.stdout.strip()[:n]
+        except subprocess.TimeoutExpired:
+            pass
+    r = subprocess.run(["mdls", "-raw", "-name", "kMDItemTextContent", str(p)],
+                       capture_output=True, text=True).stdout
+    return "" if r.strip() == "(null)" else r[:n]
+
+
 def cmd_vistazo(a):
     p = Path(os.path.expanduser(a.archivo))
     if p.parent.resolve() not in ORIGENES:
@@ -465,12 +494,9 @@ def cmd_vistazo(a):
                 texto = re.sub(r"<[^>]+>", " ", xml)
                 texto = re.sub(r"\s+", " ", texto)[:n]
         elif suf == ".pdf":
-            # textutil no lee PDF; usamos el indice de Spotlight si existe
-            r = subprocess.run(["mdls", "-raw", "-name", "kMDItemTextContent", str(p)],
-                               capture_output=True, text=True).stdout
-            texto = "" if r.strip() == "(null)" else r[:n]
+            texto = texto_pdf(p, n)
             if not texto:
-                texto = "(sin texto indexado; puedes usar Read con pages='1' si es necesario)"
+                texto = "(sin texto legible: clasifica por nombre, fecha y metadatos)"
         else:
             texto = "(tipo binario: clasifica por nombre, extension y metadatos)"
     except Exception as e:

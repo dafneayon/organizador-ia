@@ -1,0 +1,20 @@
+name: Pruebas
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  pruebas:
+    # macOS: la herramienta usa xattr (etiquetas de Finder), mdls, PDFKit y Vision
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Revisar sintaxis
+        run: |
+          /usr/bin/python3 -m py_compile herramienta.py
+          zsh -n organizador
+      - name: Compilar lector de PDF
+        run: mkdir -p bin && swiftc -O -o bin/pdf_texto pdf_texto.swift
+      - name: Pruebas de seguridad
+        run: /usr/bin/python3 -m unittest discover -s tests -v

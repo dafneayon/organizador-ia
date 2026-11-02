@@ -1,0 +1,98 @@
+{
+  "origenes": [
+    "~/Desktop",
+    "~/Downloads"
+  ],
+  "carpeta_destino": "~/Documents/Organizado",
+  "carpeta_revisar": "_Para revisar (posible eliminar)",
+  "mover_carpetas": true,
+  "renombrar_carpetas": true,
+  "proteger_proyectos": false,
+  "ajustar_rutas_proyectos": true,
+  "marcadores_proyecto": [
+    ".git",
+    ".venv",
+    "venv",
+    "node_modules",
+    "package.json",
+    "pyproject.toml",
+    "requirements.txt",
+    "Makefile",
+    ".Rproj.user",
+    "*.xcodeproj",
+    "*.code-workspace",
+    "*.Rproj"
+  ],
+  "leer_contenido": true,
+  "max_caracteres_vistazo": 1200,
+  "guardar_registro_local": true,
+  "excluir_nombres": [
+    "Piloto",
+    "OrganizadorIA",
+    "Organizado",
+    "$RECYCLE.BIN",
+    "Icon\r"
+  ],
+  "categorias": {
+    "Personal e Identidad": {
+      "color": "morado",
+      "ejemplos": "INE, pasaporte, actas, CURP, cartas poder, CV"
+    },
+    "Finanzas": {
+      "color": "verde",
+      "ejemplos": "facturas, recibos, estados de cuenta, impuestos, nominas"
+    },
+    "Salud": {
+      "color": "rojo",
+      "ejemplos": "analisis clinicos, recetas, seguros medicos"
+    },
+    "Legal y Contratos": {
+      "color": "naranja",
+      "ejemplos": "contratos, poderes, escrituras, acuerdos"
+    },
+    "Academico": {
+      "color": "azul",
+      "ejemplos": "tesis, articulos, papers, notas de clase, certificados"
+    },
+    "Trabajo": {
+      "color": "azul",
+      "ejemplos": "informes, presentaciones, propuestas, reportes de actividades"
+    },
+    "Datos y Codigo": {
+      "color": "gris",
+      "ejemplos": "csv, xlsx de datos, scripts, notebooks, zips de proyectos"
+    },
+    "Imagenes": {
+      "color": "amarillo",
+      "ejemplos": "fotos, graficos, ilustraciones"
+    },
+    "Capturas de pantalla": {
+      "color": "amarillo",
+      "ejemplos": "Captura de pantalla..., Screenshot..."
+    },
+    "Audio y Video": {
+      "color": "amarillo",
+      "ejemplos": "mp3, mp4, mov, grabaciones"
+    },
+    "Instaladores": {
+      "color": "gris",
+      "ejemplos": "dmg, pkg, exe, msi"
+    },
+    "Comprimidos": {
+      "color": "gris",
+      "ejemplos": "zip, rar, 7z, tar que no se pueden asociar a un tema"
+    },
+    "Viajes": {
+      "color": "verde",
+      "ejemplos": "boletos, reservas, itinerarios, visas"
+    },
+    "Otros": {
+      "color": "",
+      "ejemplos": "lo que no encaje claramente"
+    },
+    "Proyectos": {
+      "color": "azul",
+      "ejemplos": "carpetas de proyectos (solo si no estan protegidas)"
+    }
+  }
+}

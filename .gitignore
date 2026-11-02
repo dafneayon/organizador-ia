@@ -1,0 +1,11 @@
+# Datos personales y estado local: nunca se suben
+registro_local/
+programacion_carpetas.txt
+.una_vez
+
+# Binarios compilados al vuelo
+bin/
+
+__pycache__/
+*.pyc
+.DS_Store

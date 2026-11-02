@@ -94,7 +94,7 @@ import sys
 sys.path.insert(0, sys.argv[1])
 from configuracion import cargar
 c=cargar(sys.argv[1]).get("clasificador",{})
-sys.exit(0 if c.get("usar") and c.get("auto_mover") else 1)' "$DIR"
+sys.exit(0 if c.get("usar") and c.get("auto_mover") else 1)' "$DIR" && [[ -f "$DIR/registro_local/modelo.json" ]]  # sin modelo entrenado, no hay paso automático
 }
 
 programar() {

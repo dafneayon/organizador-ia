@@ -1,0 +1,1 @@
+Brain tumor detection and segmentation in magnetic resonance imaging using a U-Net architecture. Dice score evaluation on the BraTS dataset with volumetric quantification of the enhancing tumor.

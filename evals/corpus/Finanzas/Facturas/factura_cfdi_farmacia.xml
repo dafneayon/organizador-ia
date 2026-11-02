@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" Version="4.0" Fecha="2026-10-03T12:40:00" SubTotal="310.34" Total="360.00" Moneda="MXN" TipoDeComprobante="I" Folio="A-1029">
+  <cfdi:Emisor Rfc="AAA010101AAA" Nombre="FARMACIAS GUADALAJARA" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="XAXX010101000" Nombre="PUBLICO EN GENERAL" UsoCFDI="D01"/>
+  <cfdi:Conceptos><cfdi:Concepto Descripcion="Medicamento antibiótico amoxicilina 500 mg" Importe="310.34"/></cfdi:Conceptos>
+  <cfdi:Complemento><tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" UUID="12345678-ABCD-4EF0-9ABC-1234567890AB"/></cfdi:Complemento>
+</cfdi:Comprobante>

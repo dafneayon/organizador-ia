@@ -26,7 +26,10 @@ class Entorno(unittest.TestCase):
         for d in ("Desktop", "Downloads", "Documents/Organizado"):
             (self.home / d).mkdir(parents=True)
         self.app.mkdir()
-        for f in ("herramienta.py", "rasgos.py", "catalogo.py", "entrenar.py", "pdf_texto.swift"):
+        for f in ("herramienta.py", "extraer.py", "rasgos.py", "catalogo.py", "entrenar.py",
+                  "busqueda.py", "mcp_servidor.py", "pdf_texto.swift"):
+            if not (RAIZ / f).exists():
+                continue
             shutil.copy2(RAIZ / f, self.app)
         if (RAIZ / "bin" / "pdf_texto").exists():
             # Reutiliza el binario ya compilado para no recompilar en cada prueba

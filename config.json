@@ -26,6 +26,14 @@
   "leer_contenido": true,
   "max_caracteres_vistazo": 1200,
   "guardar_registro_local": true,
+  "busqueda": {
+    "carpetas": ["~/Documents/Organizado"],
+    "excluir": ["Personal e Identidad/Claves y certificados"],
+    "max_mb": 50,
+    "max_paginas_pdf": 25,
+    "max_caracteres_documento": 60000,
+    "modelo": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+  },
   "clasificador": {
     "usar": true,
     "auto_mover": true,

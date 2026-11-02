@@ -1,0 +1,30 @@
+{"pregunta": "recibo de CFE", "esperado": "recibo_cfe_agosto_2026.txt", "tipo": "palabras"}
+{"pregunta": "Infinitum Telmex", "esperado": "factura_telmex_septiembre.txt", "tipo": "palabras"}
+{"pregunta": "factura de Farmacias Guadalajara amoxicilina", "esperado": "factura_cfdi_farmacia.xml", "tipo": "palabras"}
+{"pregunta": "declaración anual SAT saldo a favor", "esperado": "acuse_declaracion_anual_2025.txt", "tipo": "palabras"}
+{"pregunta": "fecha de caducidad del pasaporte", "esperado": "pasaporte_datos.txt", "tipo": "palabras"}
+{"pregunta": "credencial INE vigencia", "esperado": "credencial_ine.txt", "tipo": "palabras"}
+{"pregunta": "modelos de mezcla gaussiana BIC", "esperado": "capitulo_metodologia.md", "tipo": "palabras"}
+{"pregunta": "360 realizaciones simuladas", "esperado": "resultados_simulaciones.md", "tipo": "palabras"}
+{"pregunta": "U-Net BraTS Dice", "esperado": "brain_tumor_segmentation_mri.txt", "tipo": "palabras"}
+{"pregunta": "Cambridge B2", "esperado": "certificado_ingles_b2.txt", "tipo": "palabras"}
+{"pregunta": "contrato de arrendamiento renta mensual", "esperado": "contrato_arrendamiento.txt", "tipo": "palabras"}
+{"pregunta": "glucosa y colesterol", "esperado": "analisis_sangre_2026.txt", "tipo": "palabras"}
+{"pregunta": "¿cuánto pagué de luz en el verano?", "esperado": "recibo_cfe_agosto_2026.txt", "tipo": "parafrasis"}
+{"pregunta": "¿cuánto cuesta mi internet de casa?", "esperado": "factura_telmex_septiembre.txt", "tipo": "parafrasis"}
+{"pregunta": "comprobante fiscal de la medicina que compré", "esperado": "factura_cfdi_farmacia.xml", "tipo": "parafrasis"}
+{"pregunta": "¿me van a regresar dinero de impuestos?", "esperado": "acuse_declaracion_anual_2025.txt", "tipo": "parafrasis"}
+{"pregunta": "¿cuándo tengo que renovar el documento para viajar al extranjero?", "esperado": "pasaporte_datos.txt", "tipo": "parafrasis"}
+{"pregunta": "identificación oficial para votar", "esperado": "credencial_ine.txt", "tipo": "parafrasis"}
+{"pregunta": "¿cómo elegí cuántos grupos tiene cada tumor?", "esperado": "capitulo_metodologia.md", "tipo": "parafrasis"}
+{"pregunta": "¿cuántos pacientes analicé en la tesis?", "esperado": "resultados_simulaciones.md", "tipo": "parafrasis"}
+{"pregunta": "¿cuánto pago por la casa donde vivo?", "esperado": "contrato_arrendamiento.txt", "tipo": "parafrasis"}
+{"pregunta": "¿salieron bien mis estudios de laboratorio?", "esperado": "analisis_sangre_2026.txt", "tipo": "parafrasis"}
+{"pregunta": "¿cuánto tengo que pagar antes de que el seguro cubra un hospital?", "esperado": "poliza_seguro_gastos_medicos.txt", "tipo": "parafrasis"}
+{"pregunta": "resultados de mi trabajo con el agente en la empresa", "esperado": "reporte_eficiencia_llm.md", "tipo": "parafrasis"}
+{"pregunta": "when does my passport expire?", "esperado": "pasaporte_datos.txt", "tipo": "ingles"}
+{"pregunta": "how much is my monthly rent?", "esperado": "contrato_arrendamiento.txt", "tipo": "ingles"}
+{"pregunta": "electricity bill", "esperado": "recibo_cfe_agosto_2026.txt", "tipo": "ingles"}
+{"pregunta": "health insurance deductible", "esperado": "poliza_seguro_gastos_medicos.txt", "tipo": "ingles"}
+{"pregunta": "plane ticket to Canada", "esperado": "vuelo_gdl_calgary.txt", "tipo": "ingles"}
+{"pregunta": "my English certificate score", "esperado": "certificado_ingles_b2.txt", "tipo": "ingles"}

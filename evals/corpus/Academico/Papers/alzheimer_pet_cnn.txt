@@ -1,0 +1,1 @@
+Deep learning classification of Alzheimer's disease from amyloid and FDG PET images. A convolutional neural network learns uptake patterns from both radiotracers jointly. Trained and evaluated on more than 700 scans.

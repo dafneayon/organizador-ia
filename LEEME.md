@@ -60,6 +60,24 @@ Un modelo pequeño aprende del historial cómo clasifica el agente, usando solo 
 - Solo funciona en el modo general (Escritorio y Descargas), porque es la taxonomía con la que aprendió. Con `"usar": false` se desactiva por completo.
 - El modelo y el reporte contienen fragmentos de tus nombres de archivo, así que viven en `registro_local/` y nunca se suben.
 
+## Búsqueda por preguntas en tus documentos
+Busca dentro de los documentos de `Organizado`: PDF (con OCR), Word, PowerPoint, Excel, LaTeX, texto y facturas CFDI en XML.
+
+    ~/OrganizadorIA/organizador indexar                          # la primera vez tarda; después solo lo nuevo
+    ~/OrganizadorIA/organizador buscar "recibo de luz"           # lista los documentos más relevantes
+    ~/OrganizadorIA/organizador preguntar "¿cuándo vence mi pasaporte?"   # respuesta de Claude citando tus documentos
+
+- **Híbrida:** combina palabras clave (SQLite FTS5, BM25) con significado (embeddings multilingües calculados **en tu Mac** con fastembed), fusionados con Reciprocal Rank Fusion. Encuentra "recibo de luz" aunque el documento diga "Comisión Federal de Electricidad", y también responde preguntas en inglés sobre documentos en español.
+- **Evaluación:** `evals/evaluar_busqueda.py` mide Recall@1, Recall@3 y MRR con un corpus sintético. Los resultados están en [`evals/resultados_busqueda.md`](evals/resultados_busqueda.md).
+- **Qué no se indexa:** proyectos de código, la carpeta de revisión, archivos sensibles (`.key`, `.cer`, `.pem`... incluida la e.firma del SAT), lo que esté en `busqueda.excluir` de config.json y archivos de más de `max_mb`.
+- **Privacidad:** `indexar` y `buscar` no envían nada a internet. `preguntar` sí envía a Claude los fragmentos recuperados (y nada más: Claude no recibe herramientas).
+- **Dependencias:** sin fastembed la búsqueda funciona solo con palabras clave. Para la búsqueda por significado:
+
+      ~/OrganizadorIA/.venv/bin/pip install -r ~/OrganizadorIA/requirements-busqueda.txt
+
+### Servidor MCP (Claude Desktop o Claude Code)
+`mcp_servidor.py` deja que Claude consulte tus documentos con tres herramientas de solo lectura: `buscar_documentos`, `leer_documento` (solo documentos que están en el índice) y `estado_indice`. Implementa el protocolo sin dependencias. `organizador mcp-config` muestra cómo conectarlo.
+
 ## Pruebas
 Las garantías de arriba se comprueban con pruebas automáticas que usan un HOME falso en una carpeta temporal, así que nunca tocan tus archivos:
 

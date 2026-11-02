@@ -5,6 +5,7 @@
 #   organizador programar <día> [HH:MM] [carpeta ...]        -> cada mes ese día (1-28)
 #   organizador programar-una <AAAA-MM-DD> [HH:MM] [carpeta ...] -> una sola vez
 #   organizador entrenar                  -> entrena el clasificador local con el historial
+#   organizador indexar | buscar "texto" | preguntar "pregunta" | mcp-config  -> tus documentos
 #   organizador estado | cancelar | deshacer | ayuda
 #   Con carpeta: se organiza ESA carpeta en su propio lugar (las categorías se crean dentro).
 set -e
@@ -177,11 +178,33 @@ case "${1:-ayuda}" in
     launchctl bootout "gui/$(id -u)/$ETIQ" 2>/dev/null || true
     rm -f "$PLIST" "$DIR/.una_vez" "$PROG_CARPETAS"; echo "Programación cancelada." ;;
   deshacer)   ORGANIZADOR_AGENTE=0 /usr/bin/python3 "$DIR/herramienta.py" deshacer ;;
+  indexar|buscar|preguntar|mcp-config)
+    PY="$DIR/.venv/bin/python"; [[ -x "$PY" ]] || PY=/usr/bin/python3   # sin .venv: solo palabras clave
+    orden="$1"; shift
+    case "$orden" in
+      indexar)   "$PY" -W ignore "$DIR/busqueda.py" indexar "$@" ;;
+      buscar)    "$PY" -W ignore "$DIR/busqueda.py" buscar "${1:?Uso: organizador buscar TEXTO}" "${@:2}" ;;
+      preguntar)
+        CLAUDE="$(buscar_claude)"
+        [[ -x "$CLAUDE" ]] || { echo "No encuentro 'claude'."; exit 1; }
+        "$PY" -W ignore "$DIR/busqueda.py" preguntar "${1:?Uso: organizador preguntar PREGUNTA}" --claude "$CLAUDE" ;;
+      mcp-config)
+        print -r -- "Agrega esto dentro de \"mcpServers\" en
+~/Library/Application Support/Claude/claude_desktop_config.json y reinicia Claude Desktop:
+
+    \"organizador\": {
+      \"command\": \"$PY\",
+      \"args\": [\"$DIR/mcp_servidor.py\"]
+    }
+
+O en Claude Code:
+    claude mcp add organizador -- \"$PY\" \"$DIR/mcp_servidor.py\"" ;;
+    esac ;;
   entrenar)
     [[ -x "$DIR/.venv/bin/python" ]] || {
       echo "Primero instala las dependencias de entrenamiento:"
       echo "  /usr/bin/python3 -m venv $DIR/.venv && $DIR/.venv/bin/pip install -r $DIR/requirements-entrenamiento.txt"
       exit 1; }
     "$DIR/.venv/bin/python" "$DIR/entrenar.py" ;;
-  *) sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//' ;;
+  *) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

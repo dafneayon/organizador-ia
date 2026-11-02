@@ -30,10 +30,12 @@ import re
 import shutil
 import subprocess
 import sys
-import zipfile
 from pathlib import Path
 
 AQUI = Path(__file__).resolve().parent
+sys.path.insert(0, str(AQUI))
+from extraer import OFFICE, SENSIBLES, TEXTO, texto_office, texto_pdf  # noqa: E402
+
 CONFIG = json.loads((AQUI / "config.json").read_text(encoding="utf-8"))
 
 ORIGENES = [Path(os.path.expanduser(p)).resolve() for p in CONFIG["origenes"]]
@@ -70,7 +72,6 @@ CLASIFICADOR = CONFIG.get("clasificador", {})
 MOTIVO_AUTO = "clasificador local"
 MODELO = None
 if CLASIFICADOR.get("usar") and not MODO_LOCAL:
-    sys.path.insert(0, str(AQUI))
     from rasgos import Modelo
     MODELO = Modelo.cargar(AQUI / "registro_local" / "modelo.json")
 
@@ -78,10 +79,6 @@ if CLASIFICADOR.get("usar") and not MODO_LOCAL:
 COLORES = {"ninguno": 0, "gris": 1, "verde": 2, "morado": 3, "azul": 4,
            "amarillo": 5, "rojo": 6, "naranja": 7}
 EN_DESCARGA = {".crdownload", ".download", ".part", ".partial", ".tmp"}
-SENSIBLES = {".pem", ".key", ".p12", ".pfx", ".keychain", ".kdbx", ".ovpn", ".gpg", ".asc"}
-TEXTO = {".txt", ".md", ".csv", ".tsv", ".json", ".xml", ".html", ".htm", ".py", ".r",
-         ".m", ".tex", ".bib", ".log", ".yaml", ".yml", ".ini", ".sh", ".js", ".css", ".rtf"}
-OFFICE = {".docx": "word/document.xml", ".pptx": "ppt/slides/", ".xlsx": "xl/sharedStrings.xml"}
 
 
 def fallar(msg):
@@ -471,35 +468,6 @@ def mostrar_duplicados(elementos):
         print("  = " + " | ".join(str(x) for x in g))
 
 
-def lector_pdf():
-    """Compila pdf_texto.swift en bin/ la primera vez (o si cambio). None si no hay swiftc."""
-    fuente, binario = AQUI / "pdf_texto.swift", AQUI / "bin" / "pdf_texto"
-    if binario.exists() and binario.stat().st_mtime >= fuente.stat().st_mtime:
-        return binario
-    if not shutil.which("swiftc"):
-        return None
-    binario.parent.mkdir(exist_ok=True)
-    r = subprocess.run(["swiftc", "-O", "-o", str(binario), str(fuente)],
-                       capture_output=True, text=True)
-    return binario if r.returncode == 0 else None
-
-
-def texto_pdf(p: Path, n: int) -> str:
-    """Capa de texto con PDFKit, OCR con Vision si es un escaneo; si falla, indice de Spotlight."""
-    lector = lector_pdf()
-    if lector:
-        try:
-            r = subprocess.run([str(lector), str(p), str(n), "2"],
-                               capture_output=True, text=True, timeout=60)
-            if r.returncode == 0 and r.stdout.strip():
-                return r.stdout.strip()[:n]
-        except subprocess.TimeoutExpired:
-            pass
-    r = subprocess.run(["mdls", "-raw", "-name", "kMDItemTextContent", str(p)],
-                       capture_output=True, text=True).stdout
-    return "" if r.strip() == "(null)" else r[:n]
-
-
 def cmd_vistazo(a):
     p = Path(os.path.expanduser(a.archivo))
     if p.parent.resolve() not in ORIGENES:
@@ -523,14 +491,10 @@ def cmd_vistazo(a):
     n = int(CONFIG.get("max_caracteres_vistazo", 1200))
     texto = ""
     try:
-        if suf in TEXTO:
+        if suf in TEXTO or suf == ".xml":
             texto = p.read_text(encoding="utf-8", errors="ignore")[:n]
         elif suf in OFFICE:
-            with zipfile.ZipFile(p) as z:
-                nombres = [x for x in z.namelist() if x.startswith(OFFICE[suf])][:3]
-                xml = " ".join(z.read(x).decode("utf-8", "ignore") for x in nombres)
-                texto = re.sub(r"<[^>]+>", " ", xml)
-                texto = re.sub(r"\s+", " ", texto)[:n]
+            texto = re.sub(r"\s+", " ", texto_office(p, n, partes=3))
         elif suf == ".pdf":
             texto = texto_pdf(p, n)
             if not texto:

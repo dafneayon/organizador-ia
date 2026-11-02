@@ -41,6 +41,25 @@ Truco: escribe `organizador ahora ` y arrastra la carpeta desde Finder a la Term
 ## PDF y escaneos
 `vistazo` lee el texto de los PDF con PDFKit y, si una página no tiene texto (un escaneo), hace OCR en español e inglés con Vision, todo dentro de tu Mac. El lector (`pdf_texto.swift`) se compila solo la primera vez en `bin/`. Si no hay `swiftc`, usa el índice de Spotlight como antes.
 
+## Clasificador local (aprende de tus decisiones)
+Un modelo pequeño aprende del historial cómo clasifica el agente, usando solo el **nombre, la extensión, el tamaño y el origen** de cada archivo, nunca su contenido.
+
+    ~/OrganizadorIA/organizador entrenar        # reconstruye el catálogo y reentrena
+
+- **Catálogo SQL:** `catalogo.py` convierte `registro_local/movimientos.jsonl` en `registro_local/catalogo.db` (SQLite). Hay consultas de ejemplo en `consultas.sql`:
+
+      sqlite3 ~/OrganizadorIA/registro_local/catalogo.db < ~/OrganizadorIA/consultas.sql
+
+- **Entrenamiento:** `entrenar.py` compara varios modelos con validación cruzada agrupada (las copias de un mismo archivo no se separan entre entrenamiento y prueba), elige una regresión logística y calcula el **umbral de confianza** con el que acierta al menos `precision_objetivo` (95%) fuera de muestra. El resultado queda en `registro_local/reporte_modelo.md`.
+- **Uso:** `listar` muestra `SUGERENCIA: Destino (probabilidad)` en cada elemento, y el agente usa directamente las de `[ALTA CONFIANZA]`.
+- **Decidir sin el agente:** con `"auto_mover": true` en `config.json`, lo que pasa el umbral se mueve antes de llamar a Claude. Si no queda nada, Claude no se llama. Nunca mueve archivos sensibles, proyectos de código ni posibles duplicados, y lo que mueve se puede deshacer y no se usa para reentrenar. Viene desactivado.
+- `herramienta.py` predice sin scikit-learn. Solo el entrenamiento lo necesita:
+
+      /usr/bin/python3 -m venv ~/OrganizadorIA/.venv && ~/OrganizadorIA/.venv/bin/pip install -r ~/OrganizadorIA/requirements-entrenamiento.txt
+
+- Solo funciona en el modo general (Escritorio y Descargas), porque es la taxonomía con la que aprendió. Con `"usar": false` se desactiva por completo.
+- El modelo y el reporte contienen fragmentos de tus nombres de archivo, así que viven en `registro_local/` y nunca se suben.
+
 ## Pruebas
 Las garantías de arriba se comprueban con pruebas automáticas que usan un HOME falso en una carpeta temporal, así que nunca tocan tus archivos:
 

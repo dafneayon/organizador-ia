@@ -26,6 +26,13 @@
   "leer_contenido": true,
   "max_caracteres_vistazo": 1200,
   "guardar_registro_local": true,
+  "clasificador": {
+    "usar": true,
+    "auto_mover": true,
+    "precision_objetivo": 0.95,
+    "min_ejemplos_clase": 3,
+    "min_ejemplos_subcarpeta": 5
+  },
   "excluir_nombres": [
     "Piloto",
     "OrganizadorIA",

@@ -4,6 +4,7 @@
 #   organizador simulacro [carpeta ...]   -> muestra qué haría, sin mover nada
 #   organizador programar <día> [HH:MM] [carpeta ...]        -> cada mes ese día (1-28)
 #   organizador programar-una <AAAA-MM-DD> [HH:MM] [carpeta ...] -> una sola vez
+#   organizador entrenar                  -> entrena el clasificador local con el historial
 #   organizador estado | cancelar | deshacer | ayuda
 #   Con carpeta: se organiza ESA carpeta en su propio lugar (las categorías se crean dentro).
 set -e
@@ -59,6 +60,18 @@ ${extra_txt//\$CARPETA/$carpeta}"
 
   echo "== Organizador IA $( [[ $simulacro == 1 ]] && echo '(SIMULACRO)') — ${carpeta:-Escritorio y Descargas} — $(date) =="
   cd "$DIR"
+  # Clasificador local: mueve primero lo que decide con alta confianza (solo modo general)
+  if [[ -z "$carpeta" ]] && auto_activado; then
+    /usr/bin/python3 "$HERR" auto || true
+    if [[ "$simulacro" == 1 ]]; then
+      PROMPT="$PROMPT
+Los elementos marcados [ALTA CONFIANZA] ya los movió el clasificador local (en simulacro siguen apareciendo): no los muevas ni los cuentes."
+    elif /usr/bin/python3 "$HERR" listar | grep -q '^TOTAL: 0 elementos'; then
+      echo "El clasificador local organizó todo; no hizo falta llamar al agente."
+      echo "== Fin $(date) =="
+      return
+    fi
+  fi
   # Solo tres herramientas: Read y Glob (lectura) y Bash limitado a la herramienta segura.
   # Sin Write/Edit, sin web, sin MCP, sin guardar la sesión en disco.
   "$CLAUDE" -p "$PROMPT" \
@@ -71,6 +84,13 @@ ${extra_txt//\$CARPETA/$carpeta}"
     --no-session-persistence \
     --max-turns 200
   echo "== Fin $(date) =="
+}
+
+auto_activado() {
+  /usr/bin/python3 -I -c '
+import json,sys
+c=json.load(open(sys.argv[1]+"/config.json")).get("clasificador",{})
+sys.exit(0 if c.get("usar") and c.get("auto_mover") else 1)' "$DIR"
 }
 
 programar() {
@@ -157,5 +177,11 @@ case "${1:-ayuda}" in
     launchctl bootout "gui/$(id -u)/$ETIQ" 2>/dev/null || true
     rm -f "$PLIST" "$DIR/.una_vez" "$PROG_CARPETAS"; echo "Programación cancelada." ;;
   deshacer)   ORGANIZADOR_AGENTE=0 /usr/bin/python3 "$DIR/herramienta.py" deshacer ;;
-  *) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//' ;;
+  entrenar)
+    [[ -x "$DIR/.venv/bin/python" ]] || {
+      echo "Primero instala las dependencias de entrenamiento:"
+      echo "  /usr/bin/python3 -m venv $DIR/.venv && $DIR/.venv/bin/pip install -r $DIR/requirements-entrenamiento.txt"
+      exit 1; }
+    "$DIR/.venv/bin/python" "$DIR/entrenar.py" ;;
+  *) sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

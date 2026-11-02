@@ -17,6 +17,7 @@ Uso:
   herramienta.py revisar --motivo "texto" <archivo> [<archivo> ...]
   herramienta.py renombrar --nuevo-nombre "Nombre" <carpeta>   (solo carpetas, nunca archivos)
   herramienta.py etiquetar --etiqueta "Nombre" [--color rojo] <ruta> [<ruta> ...]
+  herramienta.py auto                (mueve lo que el clasificador local decide con alta confianza)
   herramienta.py deshacer            (solo para uso manual, revierte la ultima ejecucion)
 """
 import argparse
@@ -62,6 +63,16 @@ GUARDAR_REGISTRO = bool(CONFIG.get("guardar_registro_local", True))
 SIMULACRO = os.environ.get("ORGANIZADOR_SIMULACRO") == "1"
 EJECUCION = os.environ.get("ORGANIZADOR_EJECUCION", dt.datetime.now().strftime("%Y%m%d-%H%M%S"))
 REGISTRO = AQUI / "registro_local" / "movimientos.jsonl"
+
+# Clasificador local (lo entrena entrenar.py con el historial). Solo en el modo general,
+# que es la taxonomia con la que aprendio. Predice sin dependencias externas.
+CLASIFICADOR = CONFIG.get("clasificador", {})
+MOTIVO_AUTO = "clasificador local"
+MODELO = None
+if CLASIFICADOR.get("usar") and not MODO_LOCAL:
+    sys.path.insert(0, str(AQUI))
+    from rasgos import Modelo
+    MODELO = Modelo.cargar(AQUI / "registro_local" / "modelo.json")
 
 # Numeros de color de Finder
 COLORES = {"ninguno": 0, "gris": 1, "verde": 2, "morado": 3, "azul": 4,
@@ -383,6 +394,23 @@ def cmd_listar(a):
     else:
         cats = sorted(d.name for d in BASE.iterdir() if d.is_dir()) if BASE.exists() else []
     print(f"CATEGORIAS EXISTENTES: {cats}")
+    elementos = recorrer_origenes()
+    for p, es_dir, tam, dias in elementos:
+        marca = " [POSIBLE SENSIBLE]" if p.suffix.lower() in SENSIBLES else ""
+        if es_dir and es_categoria(p):
+            marca = " [CATEGORIA ya organizada: no mover]"
+        elif es_dir and proyecto_bloqueado(p):
+            marca = " [PROYECTO PROTEGIDO: no mover ni renombrar]"
+        elif es_dir and es_proyecto(p):
+            marca = " [PROYECTO: al moverlo/renombrarlo se ajustan sus rutas internas]" if AJUSTAR_RUTAS else " [PROYECTO: sus rutas internas NO se ajustan]"
+        print(f"{'DIR ' if es_dir else 'FILE'} | {p} | {tam/1e6:.2f} MB | {dias} dias sin modificar{marca}{sugerencia(p, es_dir, tam)}")
+    print(f"TOTAL: {len(elementos)} elementos")
+    if a.duplicados:
+        mostrar_duplicados(elementos)
+
+
+def recorrer_origenes():
+    """Elementos sueltos (no excluidos) de las carpetas de origen: (ruta, es_dir, tamano, dias)."""
     hoy = dt.datetime.now().timestamp()
     elementos = []
     for o in ORIGENES:
@@ -402,35 +430,45 @@ def cmd_listar(a):
             if es_dir and not proyecto_bloqueado(p):
                 tam = sum(f.stat().st_size for f in p.rglob("*") if f.is_file() and not f.is_symlink())
             elementos.append((p, es_dir, tam, int((hoy - st.st_mtime) / 86400)))
-    for p, es_dir, tam, dias in elementos:
-        marca = " [POSIBLE SENSIBLE]" if p.suffix.lower() in SENSIBLES else ""
-        if es_dir and es_categoria(p):
-            marca = " [CATEGORIA ya organizada: no mover]"
-        elif es_dir and proyecto_bloqueado(p):
-            marca = " [PROYECTO PROTEGIDO: no mover ni renombrar]"
-        elif es_dir and es_proyecto(p):
-            marca = " [PROYECTO: al moverlo/renombrarlo se ajustan sus rutas internas]" if AJUSTAR_RUTAS else " [PROYECTO: sus rutas internas NO se ajustan]"
-        print(f"{'DIR ' if es_dir else 'FILE'} | {p} | {tam/1e6:.2f} MB | {dias} dias sin modificar{marca}")
-    print(f"TOTAL: {len(elementos)} elementos")
-    if a.duplicados:
-        por_tam = {}
-        for p, es_dir, tam, _ in elementos:
-            if not es_dir and tam > 0:
-                por_tam.setdefault(tam, []).append(p)
-        grupos = {}
-        for lista in por_tam.values():
-            if len(lista) < 2:
-                continue
-            for p in lista:
-                h = hashlib.sha256()
-                with p.open("rb") as f:
-                    for bloque in iter(lambda: f.read(1 << 20), b""):
-                        h.update(bloque)
-                grupos.setdefault(h.hexdigest(), []).append(p)
-        dup = [g for g in grupos.values() if len(g) > 1]
-        print(f"DUPLICADOS EXACTOS: {len(dup)} grupos")
-        for g in dup:
-            print("  = " + " | ".join(str(x) for x in g))
+    return elementos
+
+
+def prediccion(p: Path, es_dir: bool, tam: int):
+    """(destino, probabilidad) del clasificador local, o None si no aplica."""
+    if MODELO is None or p.suffix.lower() in SENSIBLES or (es_dir and es_proyecto(p)):
+        return None
+    # En el entrenamiento las carpetas no llevan tamano
+    return MODELO.predecir(p.name, es_dir, None if es_dir else tam, str(p.parent))
+
+
+def sugerencia(p: Path, es_dir: bool, tam: int) -> str:
+    r = prediccion(p, es_dir, tam)
+    if not r:
+        return ""
+    destino, prob = r
+    alta = " [ALTA CONFIANZA]" if prob >= MODELO.umbral else ""
+    return f" | SUGERENCIA: {destino} ({prob:.2f}){alta}"
+
+
+def mostrar_duplicados(elementos):
+    por_tam = {}
+    for p, es_dir, tam, _ in elementos:
+        if not es_dir and tam > 0:
+            por_tam.setdefault(tam, []).append(p)
+    grupos = {}
+    for lista in por_tam.values():
+        if len(lista) < 2:
+            continue
+        for p in lista:
+            h = hashlib.sha256()
+            with p.open("rb") as f:
+                for bloque in iter(lambda: f.read(1 << 20), b""):
+                    h.update(bloque)
+            grupos.setdefault(h.hexdigest(), []).append(p)
+    dup = [g for g in grupos.values() if len(g) > 1]
+    print(f"DUPLICADOS EXACTOS: {len(dup)} grupos")
+    for g in dup:
+        print("  = " + " | ".join(str(x) for x in g))
 
 
 def lector_pdf():
@@ -565,6 +603,26 @@ def cmd_etiquetar(a):
         print(f"{'[SIMULACRO] ' if SIMULACRO else ''}ETIQUETADO: {p.relative_to(BASE)} -> {a.etiqueta}")
 
 
+def cmd_auto(a):
+    """Mueve sin el agente lo que el clasificador local decide con alta confianza.
+    Se registra con motivo 'clasificador local' para que no se use para reentrenar."""
+    if MODELO is None:
+        fallar("no hay clasificador: entrenalo con 'organizador entrenar' (o 'usar' esta desactivado)")
+    n = 0
+    for p, es_dir, tam, _ in recorrer_origenes():
+        r = prediccion(p, es_dir, tam)
+        if not r or r[1] < MODELO.umbral or (es_dir and es_categoria(p)):
+            continue
+        destino, prob = r
+        carpeta = limpiar_destino(destino)
+        if (carpeta / p.name).exists():
+            continue  # posible duplicado: lo decide el agente
+        cat = destino.split("/")[0]
+        mover_uno(p, carpeta, cat, color_de(cat), f"{MOTIVO_AUTO} ({prob:.2f})")
+        n += 1
+    print(f"{'[SIMULACRO] ' if SIMULACRO else ''}CLASIFICADOR LOCAL: {n} elemento(s) con confianza >= {MODELO.umbral:.2f}")
+
+
 def cmd_deshacer(a):
     if not REGISTRO.exists():
         fallar("no hay registro de movimientos")
@@ -605,6 +663,7 @@ def main():
     s = sub.add_parser("renombrar"); s.add_argument("--nuevo-nombre", required=True); s.add_argument("carpeta"); s.set_defaults(f=cmd_renombrar)
     s = sub.add_parser("etiquetar"); s.add_argument("--etiqueta", required=True); s.add_argument("--color"); s.add_argument("rutas", nargs="+"); s.set_defaults(f=cmd_etiquetar)
     s = sub.add_parser("validar"); s.set_defaults(f=lambda a: print(f"OK: {BASE}"))
+    s = sub.add_parser("auto"); s.set_defaults(f=cmd_auto)
     s = sub.add_parser("deshacer"); s.add_argument("--ejecucion"); s.set_defaults(f=cmd_deshacer)
     a = ap.parse_args()
     if MODO_LOCAL and a.orden != "deshacer":
